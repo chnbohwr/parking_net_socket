@@ -1,0 +1,7 @@
+{
+  "car_total": 160,
+  "moto_total": 100,
+  "bus_total": 100,
+  "parking_num": "04",
+  "car_file": "./data.txt"
+}
