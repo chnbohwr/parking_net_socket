@@ -31,7 +31,7 @@ client.connect(config.port, config.ip, () => {
 });
 
 client.on('data', (data) => {
-  console.log('Received: ' + data);
+  console.log('Received: ' + data.toString('hex'));
   // client.destroy(); // kill client after server's response
 });
 
