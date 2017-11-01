@@ -4,8 +4,7 @@ const net = require('net');
 const config = require('./config.json');
 const fs = require('fs');
 
-const d2h = (d) => { return leftPad((+d).toString(16), 4, '0'); }
-
+const d2h = (d) => { return leftPad((+d).toString(16), 4, '0'); };
 const getData = () => {
   const fileData = fs.readFileSync(config.car_file).toString();
   const car_now = parseInt(fileData);
@@ -19,22 +18,25 @@ const getData = () => {
     d2h(0);
   const sum = leftPad(crc.calCrc(data).toString(16), 4, '0');
   return data + sum;
-}
+};
 
-const client = new net.Socket();
-client.connect(config.port, config.ip, () => {
-  setInterval(() => {
-    const data = getData();
-    console.log('send data: ' + data);
-    client.write(data, 'hex');
-  }, 10000)
-});
+setInterval(() => {
+  const client = new net.Socket();
+  try {
+    client.connect(config.port, config.ip, () => {
+      const data = getData();
+      console.log('send data: ' + data);
+      client.write(data, 'hex');
+    });
+    client.on('data', (data) => {
+      console.log('Received: ' + data.toString('hex'));
+      client.destroy(); // kill client after server's response
+    });
+    client.on('close', () => {
+      console.log('Connection closed');
+    });
+  } catch (e) {
+    console.log('something error', e);
+  }
+}, config.timeout);
 
-client.on('data', (data) => {
-  console.log('Received: ' + data.toString('hex'));
-  // client.destroy(); // kill client after server's response
-});
-
-client.on('close', () => {
-  console.log('Connection closed');
-});
