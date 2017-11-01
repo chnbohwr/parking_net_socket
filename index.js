@@ -1,4 +1,4 @@
-const crc = require('modbus-crc16');
+const crc = require('./crc');
 const leftPad = require('left-pad')
 const net = require('net');
 const config = require('./config.json');
