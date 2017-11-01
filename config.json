@@ -3,5 +3,7 @@
   "moto_total": 100,
   "bus_total": 100,
   "parking_num": "04",
-  "car_file": "./data.txt"
+  "car_file": "./data.txt",
+  "ip": "61.216.159.208",
+  "port": "53504"
 }

@@ -1,50 +1,40 @@
-var crc = require('node-crc16');
-var net = require('net');
-var config = require('./config.json');
-var fs = require('fs');
+const crc = require('modbus-crc16');
+const leftPad = require('left-pad')
+const net = require('net');
+const config = require('./config.json');
+const fs = require('fs');
 
+const d2h = (d) => { return leftPad((+d).toString(16), 4, '0'); }
 
-function padLeft(str) {
-  if (str.length >= 4)
-    return str;
-  else
-    return padLeft("0" + str, 4);
-}
-
-function d2h(d) { return (+d).toString(16); }
-
-function carNum(d) { return padLeft(d2h(d)); }
-
-function getData() {
-  var fileData = fs.readFileSync(config.car_file).toString();
-  // console.log(fileData);
-  var car_now = parseInt(fileData);
-  // console.log(car_now);
-  var data = config.parking_num +
+const getData = () => {
+  const fileData = fs.readFileSync(config.car_file).toString();
+  const car_now = parseInt(fileData);
+  const data = config.parking_num +
     '12000000060C' +
-    carNum(config.car_total) +
-    carNum(car_now) +
-    carNum(config.moto_total) +
-    carNum(0) +
-    carNum(config.bus_total) +
-    carNum(0);
-  var sum = crc.checkSum(data);
+    d2h(config.car_total) +
+    d2h(car_now) +
+    d2h(config.moto_total) +
+    d2h(0) +
+    d2h(config.bus_total) +
+    d2h(0);
+  const sum = leftPad(crc.calCrc(data).toString(16), 4, '0');
   return data + sum;
 }
 
-var client = new net.Socket();
-client.connect(53504, '61.216.159.208', function () {
-  var data = getData();
-  console.log('send data: ' + data);
-  // client.write(data);
-  client.write(data, 'hex');
+const client = new net.Socket();
+client.connect(config.port, config.ip, () => {
+  setInterval(() => {
+    const data = getData();
+    console.log('send data: ' + data);
+    client.write(data, 'hex');
+  }, 10000)
 });
 
-client.on('data', function (data) {
+client.on('data', (data) => {
   console.log('Received: ' + data);
   // client.destroy(); // kill client after server's response
 });
 
-client.on('close', function () {
+client.on('close', () => {
   console.log('Connection closed');
 });
