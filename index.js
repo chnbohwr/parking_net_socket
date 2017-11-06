@@ -7,7 +7,8 @@ const fs = require('fs');
 const d2h = (d) => { return leftPad((+d).toString(16), 4, '0'); };
 const getData = () => {
   const fileData = fs.readFileSync(config.car_file).toString();
-  const car_now = parseInt(fileData);
+  let car_now = parseInt(fileData);
+  car_now = car_now < 0 ? 0 : car_now;
   const data = config.parking_num +
     '12000000060C' +
     d2h(config.car_total) +
@@ -30,7 +31,7 @@ setInterval(() => {
     });
     client.on('data', (data) => {
       console.log('Received: ' + data.toString('hex'));
-      client.destroy(); // kill client after server's response
+      client.destroy(); // kill client after server's response 
     });
     client.on('close', () => {
       console.log('Connection closed');
